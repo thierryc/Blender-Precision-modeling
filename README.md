@@ -1,6 +1,7 @@
 # Precision Modeling Switch
 
-Precision Modeling Switch is a small Blender add-on that toggles a scene and all open 3D viewports between Blender's default modeling setup and a millimeter-accurate configuration suitable for 3D printing.
+Precision Modeling Switch is a small Blender add-on that toggles a scene and all open 3D viewports between Blender's default modeling setup and a **millimeter-accurate configuration** suitable for **3D printing** or building **small industrial design objects**.
+
 
 ## Features
 - Switch between **Default** and **Precision** modes
