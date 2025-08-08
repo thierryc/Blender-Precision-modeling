@@ -21,3 +21,5 @@ Press **Save as Startup** to store the current configuration as your Blender def
 
 ## License
 This project is released under the [GPL-3.0-or-later](LICENSE) license.
+
+<img width="1840" height="1191" alt="image" src="https://github.com/user-attachments/assets/31c0b26c-6d7a-4984-9f8f-9199d417247b" />
