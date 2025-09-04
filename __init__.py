@@ -10,7 +10,7 @@ import bpy  # type: ignore
 bl_info = {
     "name": "Precision Modeling Switch",
     "author": "Thierry Charbonnel",
-    "version": (1, 0, 1),
+    "version": (1, 0, 2),
     "blender": (4, 0, 0),
     "location": "View3D > Sidebar > Precision",
     "description": "Toggle precision settings for modeling in millimeters.",
