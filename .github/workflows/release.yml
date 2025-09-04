@@ -11,13 +11,27 @@ jobs:
         with:
           lfs: true            # fetch real LFS files
           submodules: recursive
-      # (add your build steps here)
-      - name: Create zip
+      - name: Package Blender add-on
+        shell: bash
         run: |
-          mkdir -p release
-          zip -r release/myapp-${GITHUB_REF_NAME}.zip . -x ".git/*"
+          set -euo pipefail
+          TAG_NAME="${GITHUB_REF_NAME}"
+          PKG_DIR="dist"
+          ADDON_DIR_NAME="precision_modeling_switch"
+          ZIP_NAME="precision-modeling-switch-${TAG_NAME}.zip"
+
+          rm -rf "$PKG_DIR"
+          mkdir -p "$PKG_DIR/$ADDON_DIR_NAME"
+          # Copy only the files needed by Blender when installing the add-on
+          cp -v __init__.py "$PKG_DIR/$ADDON_DIR_NAME/"
+          [ -f LICENSE ] && cp -v LICENSE "$PKG_DIR/$ADDON_DIR_NAME/"
+          [ -f README.md ] && cp -v README.md "$PKG_DIR/$ADDON_DIR_NAME/"
+
+          # Create the distributable ZIP: top-level folder is the module name
+          (cd "$PKG_DIR" && zip -r "$ZIP_NAME" "$ADDON_DIR_NAME")
+          echo "Created $PKG_DIR/$ZIP_NAME"
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release/myapp-${{ github.ref_name }}.zip
+          files: dist/precision-modeling-switch-${{ github.ref_name }}.zip
           generate_release_notes: true

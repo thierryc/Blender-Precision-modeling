@@ -4,13 +4,13 @@
 
 from __future__ import annotations
 
-import bpy
-
+# Blender library, available in plugin context
+import bpy  # type: ignore
 
 bl_info = {
     "name": "Precision Modeling Switch",
     "author": "Thierry Charbonnel",
-    "version": (1, 0, 0),
+    "version": (1, 0, 1),
     "blender": (4, 0, 0),
     "location": "View3D > Sidebar > Precision",
     "description": "Toggle precision settings for modeling in millimeters.",
