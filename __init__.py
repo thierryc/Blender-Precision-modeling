@@ -25,38 +25,76 @@ bl_info = {
 # Helpers
 # -----------------------------------------------------------------------------
 
-def iter_view3d_spaces():
-    """Yield all View3D spaces across all open windows."""
+def iter_view3d_areas_spaces():
+    """Yield (area, space) for all View3D spaces across all windows."""
     for window in bpy.context.window_manager.windows:
         screen = window.screen
         for area in screen.areas:
             if area.type == "VIEW_3D":
                 for space in area.spaces:
                     if space.type == "VIEW_3D":
-                        yield space
+                        yield area, space
+
+
+def redraw_all_viewports():
+    """Request a redraw on all areas and flush once if possible."""
+    for window in bpy.context.window_manager.windows:
+        for area in window.screen.areas:
+            area.tag_redraw()
+    try:
+        bpy.ops.wm.redraw_timer(type="DRAW_WIN_SWAP", iterations=1)
+    except Exception:
+        # The operator may fail in some contexts; tagging is enough.
+        pass
 
 
 def apply_precision(context):
-    """Configure scene and viewports for millimeter precision."""
+    """Configure scene and viewports for millimeter precision.
+
+    Applies settings in small, explicit steps with redraws to
+    avoid transient GL artifacts. Also keeps a safer near clip
+    to prevent depth-buffer z-fighting.
+    """
     scene = context.scene
     units = scene.unit_settings
-    units.system = "METRIC"
-    units.length_unit = "MILLIMETERS"
-    units.scale_length = 0.001
 
+    # Units (step-by-step) -------------------------------------------------
+    units.system = "METRIC"
+    redraw_all_viewports()
+    units.length_unit = "MILLIMETERS"
+    redraw_all_viewports()
+    units.scale_length = 0.001
+    redraw_all_viewports()
+
+    # Snapping (step-by-step) ----------------------------------------------
     ts = scene.tool_settings
     ts.use_snap = True
+    redraw_all_viewports()
     ts.snap_elements = {"INCREMENT"}
+    redraw_all_viewports()
     ts.use_snap_grid_absolute = True
+    redraw_all_viewports()
     ts.use_snap_translate = True
+    redraw_all_viewports()
     ts.use_snap_rotate = True
+    redraw_all_viewports()
     ts.use_snap_scale = True
+    redraw_all_viewports()
 
-    for space in iter_view3d_spaces():
+    # Viewports -------------------------------------------------------------
+    # Use 1 mm as near clip to greatly reduce z-fighting in Solid mode.
+    safe_near_clip = 0.001
+
+    for area, space in iter_view3d_areas_spaces():
         overlay = space.overlay
         overlay.grid_scale = 0.001
-        overlay.grid_subdivisions = 0
-        space.clip_start = 0.0001
+        area.tag_redraw()
+        overlay.grid_subdivisions = 10
+        area.tag_redraw()
+        space.clip_start = safe_near_clip
+        area.tag_redraw()
+
+    redraw_all_viewports()
 
 
 def apply_default(context):
@@ -75,11 +113,16 @@ def apply_default(context):
     ts.use_snap_rotate = False
     ts.use_snap_scale = False
 
-    for space in iter_view3d_spaces():
+    for area, space in iter_view3d_areas_spaces():
         overlay = space.overlay
         overlay.grid_scale = 1.0
+        area.tag_redraw()
         overlay.grid_subdivisions = 10
+        area.tag_redraw()
         space.clip_start = 0.01
+        area.tag_redraw()
+
+    redraw_all_viewports()
 
 
 # -----------------------------------------------------------------------------

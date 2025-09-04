@@ -1,0 +1,23 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*.*.*'   # e.g. v1.2.3
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true            # fetch real LFS files
+          submodules: recursive
+      # (add your build steps here)
+      - name: Create zip
+        run: |
+          mkdir -p release
+          zip -r release/myapp-${GITHUB_REF_NAME}.zip . -x ".git/*"
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/myapp-${{ github.ref_name }}.zip
+          generate_release_notes: true
